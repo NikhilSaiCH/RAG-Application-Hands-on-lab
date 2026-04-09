@@ -5,23 +5,23 @@
         "BaseURL": "",
         "Files": [
             {
-                "RawFilePath": "",
+                "RawFilePath": "https://raw.githubusercontent.com/NikhilSaiCH/RAG-Application-Hands-on-lab/refs/heads/main/Lab/Getting_Started.md",
                 "Order": 1
             },
             {
-                "RawFilePath": "",
+                "RawFilePath": "https://raw.githubusercontent.com/NikhilSaiCH/RAG-Application-Hands-on-lab/refs/heads/main/Lab/Lab1.md",
                 "Order": 2
             },
             {
-                "RawFilePath": "",
+                "RawFilePath": "https://raw.githubusercontent.com/NikhilSaiCH/RAG-Application-Hands-on-lab/refs/heads/main/Lab/Lab2.md",
                 "Order": 3
             },
             {
-                "RawFilePath": "",
+                "RawFilePath": "https://raw.githubusercontent.com/NikhilSaiCH/RAG-Application-Hands-on-lab/refs/heads/main/Lab/Lab3.md",
                 "Order": 4
             },
             {
-                "RawFilePath": "",
+                "RawFilePath": "https://raw.githubusercontent.com/NikhilSaiCH/RAG-Application-Hands-on-lab/refs/heads/main/Lab/Lab4.md",
                 "Order": 5
             }
         ]
