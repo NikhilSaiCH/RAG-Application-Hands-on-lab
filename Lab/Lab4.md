@@ -54,31 +54,65 @@ Familiarize yourself with the web application's user interface.
 
 The question is sent to the RAG system for processing.
 
-Examine the AI-generated response and the document citations provided.
-
-5. The response also includes a **"Learn More"** link to source documents (e.g., "1. terms-of-service.md")
+5. The response also includes a **"Learn More(1)"** link to source documents.
 
 ![AI Response with Citations](../Media/56.PNG)
+
+Examine the AI-generated response and the document citations provided.
 
 This demonstrates the complete RAG workflow: query retrieval, document search, and AI-augmented response generation.
 
 ---
-## Step 3: Test Multiple Queries
-Verify the RAG system's consistency and accuracy with different questions.
+## Step 3: Prompting Sessions with Enterprise Data
+Now that you have explored the chat interface, try asking questions related to the Contoso Real Estate documents that were indexed in the Azure AI Search service. These documents include terms of service, privacy policy, customer support guide, and other enterprise data from the repository dataset.
 
-1. Ask several different questions about the Contoso Real Estate documents
-2. Test questions about:
-   - Policies (refund, cancellation, booking rules)
-   - Property information and listings
-   - Rental procedures and requirements
-   - Terms of service and conditions
+Here are some sample prompts you can try in the chat interface:
 
-3. For each response, review:
-   - The accuracy and relevance of the answer
-   - The quality and completeness of document citations
-   - The supporting context provided
+1. **Refund Policy Questions:**
+   ```
+   What is the refund policy for Contoso Real Estate?
+   ```
+   ```
+   Can I get a refund if I cancel my booking within 24 hours?
+   ```
 
-4. Verify that follow-up questions are logically related to your queries
+2. **Booking and Search Questions:**
+   ```
+   How do I search and book rental properties?
+   ```
+   ```
+   What information do I need to provide when booking a property?
+   ```
+
+3. **Privacy and Terms Questions:**
+   ```
+   What is covered in the privacy policy?
+   ```
+   ```
+   What are the terms of service for using Contoso Real Estate services?
+   ```
+
+4. **Support and Contact Questions:**
+   ```
+   How can I contact customer support?
+   ```
+   ```
+   What should I do if I have issues with my booking?
+   ```
+
+5. **Property Information Questions:**
+   ```
+   What types of properties are available for rent?
+   ```
+   ```
+   Are there any restrictions on property usage?
+   ```
+
+For each prompt you try:
+- Observe how the RAG system retrieves relevant information from the indexed documents
+- Check the citations provided in the response
+- Review the supporting context in the tabs
+- Note how follow-up questions build on previous conversations
 
 ---
 ## Understanding the RAG Workflow

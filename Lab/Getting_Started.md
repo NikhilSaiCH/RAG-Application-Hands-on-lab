@@ -17,7 +17,6 @@ By the end of this lab, you will be able to:
 - Upload and manage documents in Azure Blob Storage to serve as the knowledge base for your RAG application.
 - Deploy Azure OpenAI model deployments — a GPT-4o chat model and a text-embedding-ada-002 embedding model — through Azure AI Foundry.
 - Configure the Azure AI Search pipeline using the Import Data wizard to create a data source, skillset, index, and indexer pointing at your Blob Storage.
-- Deploy the Search API backend container application to Azure Container Apps using the Azure Developer CLI (azd).
 - Validate the end-to-end RAG experience by interacting with the live Static Web App frontend and posing document-grounded questions.
 
 # Getting Started with Lab
