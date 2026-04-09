@@ -2,7 +2,7 @@
     {
         "Name": "ChatGPT + Enterprise data with Azure OpenAI and Azure AI Search",
         "Language": "English",
-        "BaseURL": "",
+        "BaseURL": "https://github.com/NikhilSaiCH/RAG-Application-Hands-on-lab.git",
         "Files": [
             {
                 "RawFilePath": "https://raw.githubusercontent.com/NikhilSaiCH/RAG-Application-Hands-on-lab/refs/heads/main/Lab/Getting_Started.md",
