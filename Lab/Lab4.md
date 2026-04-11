@@ -1,21 +1,20 @@
-# Lab 4: Access and Test the Deployed RAG Web Application
-### Overall Estimated Duration: 20 Minutes
----
-## Overview
-In this final lab, you will access the deployed RAG web application hosted on Azure Static Web Apps. This application integrates your Azure OpenAI GPT-4o chat model with the Azure AI Search index created in Lab 3. You will test the chat interface by asking questions about the Contoso Real Estate documents and verify that the RAG system returns accurate answers with relevant document citations and support context.
+# Exercise 4: Access and Test the Deployed RAG Web Application
 
----
-## Objectives
-By the end of this lab, you will be able to:
-- Locate the deployed Static Web App in the Azure Portal
-- Access the RAG web application through its public URL
-- Test the chat interface with natural language queries
-- Understand how the RAG system retrieves relevant documents
-- View AI responses with citations and supporting context
-- Verify the end-to-end RAG workflow is operational
+## Lab scenario
 
----
-## Step 1: Search for Static Web Apps in Azure Portal
+In this final exercise, you will access the deployed RAG web application hosted on Azure Static Web Apps. This application integrates your Azure OpenAI GPT-4o chat model with the Azure AI Search index created in Exercise 3. You will test the chat interface by asking questions about the Contoso Real Estate documents and verify that the RAG system returns accurate answers with relevant document citations and support context.
+
+## Lab objectives
+
+In this exercise, you will complete the following tasks:
+
+- Task 1: Locate the deployed Static Web App in the Azure Portal
+- Task 2: Explore the chat interface and understand the RAG workflow
+- Task 3: Test the application with various queries about enterprise data
+- Task 4: Review AI responses with citations and supporting context
+
+## Estimated time: 20 minutes
+## Task 1: Search for Static Web Apps in Azure Portal
 Start by finding the deployed Static Web App resource in the Azure Portal.
 
 1. Open the **Azure Portal** in your web browser
@@ -39,7 +38,7 @@ Retrieve and open the application's public URL to access the RAG chat interface.
 This URL is the public endpoint for your deployed RAG application where users can access the chat interface.
 
 ---
-## Step 2: Explore the Chat Interface
+## Task 2: Explore the Chat Interface
 Familiarize yourself with the web application's user interface.
 
 1. The web application displays the main chat interface with the title **"Chat with our support team"**
@@ -63,7 +62,7 @@ Examine the AI-generated response and the document citations provided.
 This demonstrates the complete RAG workflow: query retrieval, document search, and AI-augmented response generation.
 
 ---
-## Step 3: Prompting Sessions with Enterprise Data
+## Task 3: Prompting Sessions with Enterprise Data
 Now that you have explored the chat interface, try asking questions related to the Contoso Real Estate documents that were indexed in the Azure AI Search service. These documents include terms of service, privacy policy, customer support guide, and other enterprise data from the repository dataset.
 
 Here are some sample prompts you can try in the chat interface:
@@ -114,40 +113,40 @@ For each prompt you try:
 - Review the supporting context in the tabs
 - Note how follow-up questions build on previous conversations
 
----
-## Understanding the RAG Workflow
-The application you just tested demonstrates the complete Retrieval-Augmented Generation process:
+## Summary
 
-**Step 1: Query Processing**
-- Your question is submitted to the application
-- The query is analyzed to understand intent and context
+In this exercise, you have accomplished the following:
 
-**Step 2: Document Retrieval**
-- Azure AI Search searches the index for relevant documents
-- The embedding model vectorizes your query for semantic matching
-- Top matching documents are retrieved (e.g., terms-of-service.md)
+- Located and accessed the deployed Static Web App in the Azure Portal
+- Explored the RAG web application chat interface and understood its features
+- Tested the application with various natural language queries about enterprise data
+- Verified that the RAG system provides accurate responses with document citations
+- Experienced the complete end-to-end RAG workflow from query to response
 
-**Step 3: Context Augmentation**
-- Retrieved document excerpts are prepared as context
-- The context is combined with your question
+You have successfully completed Exercise 4 and the entire Azure OpenAI and Azure AI Search workshop! You now have a fully functional RAG application that demonstrates the power of combining generative AI with semantic search for enterprise knowledge management and intelligent document processing.
 
-**Step 4: Generation**
-- Azure OpenAI GPT-4o generates a response using:
-  - The original question
-  - Retrieved document context
-  - System instructions for citation
+## Optional Extensions (Advanced Scenarios)
 
-**Step 5: Response Enhancement**
-- The response includes citations to source documents
-- Supporting context is organized in tabs
-- Related follow-up questions are suggested
+If you'd like to extend your learning beyond the basic RAG implementation, here are some advanced scenarios you can explore:
 
-## Congratulations!
-You have successfully completed the Azure OpenAI and Azure AI Search workshop! You now have a fully functional RAG application that can:
+### Extension 1: Multi-turn Conversations and Context Management
+- Test follow-up questions that build on previous context
+- Explore how the system maintains conversation history
+- Try complex multi-part queries that require understanding relationships between different documents
 
-- Answer questions about uploaded documents using natural language
-- Provide accurate responses with source citations
-- Scale to handle large document collections
-- Integrate with various Azure AI services
+### Extension 2: Custom Document Upload and Testing
+- Upload your own documents to the knowledge base
+- Test the system's ability to answer questions about new content
+- Compare response accuracy between different document types (PDFs, Word docs, text files)
 
-This implementation demonstrates the power of combining generative AI with semantic search for enterprise knowledge management and intelligent document processing.
+### Extension 3: Performance Monitoring and Analytics
+- Monitor query response times and system performance
+- Review Azure Application Insights for usage patterns
+- Analyze which documents are most frequently referenced
+
+### Extension 4: Advanced Query Techniques
+- Test the system with ambiguous or complex questions
+- Try queries that require synthesis of information from multiple documents
+- Explore edge cases like out-of-scope questions or contradictory information
+
+These extensions will help you gain deeper insights into RAG system capabilities, performance optimization, and real-world deployment considerations.

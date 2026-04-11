@@ -1,20 +1,22 @@
-# Lab 3: Configure Azure AI Search for RAG
-### Overall Estimated Duration: 1 Hour
----
-## Overview
-In this lab, you will configure Azure AI Search to create a retrieval-augmented generation (RAG) pipeline. This service will index the documents from Azure Blob Storage, vectorize the content using the embedding model deployed in Lab 2, and enable semantic search capabilities. By the end of this lab, you will have a fully functional search index that can retrieve relevant documents for your AI applications.
+# Exercise 3: Configure Azure AI Search for RAG
 
----
-## Objectives
-By the end of this lab, you will be able to:
-- Set up an Azure AI Search import pipeline from Blob Storage
-- Configure vector embeddings using Azure OpenAI
-- Enable semantic ranking for improved search relevance
-- Create and run an indexer to populate the search index
-- Validate document retrieval using the Search explorer.
+## Lab scenario
 
----
-## Step 1: Navigate to Azure AI Search Service
+In this exercise, you will configure Azure AI Search to create a retrieval-augmented generation (RAG) pipeline. This service will index the documents from Azure Blob Storage, vectorize the content using the embedding model deployed in Exercise 2, and enable semantic search capabilities. By the end of this exercise, you will have a fully functional search index that can retrieve relevant documents for your AI applications.
+
+## Lab objectives
+
+In this exercise, you will complete the following tasks:
+
+- Task 1: Navigate to Azure AI Search service
+- Task 2: Configure data source connection to Azure Blob Storage
+- Task 3: Set up vector embeddings using Azure OpenAI
+- Task 4: Configure AI skills and advanced settings
+- Task 5: Create and run the search index
+- Task 6: Validate document indexing and search functionality
+
+## Estimated time: 1 hour
+## Task 1: Navigate to Azure AI Search Service
 Start by locating and opening your Azure AI Search service in the Azure Portal.
 
 1. In the Azure Portal search bar at the top, search for **"AI Search (1)"**
@@ -29,7 +31,7 @@ This action will launch the guided import wizard to configure your data pipeline
 ![Open Import Data Wizard](../Media/35.PNG)
 
 ---
-## Step 2: Configure Data Source Connection
+## Task 2: Configure Data Source Connection
 
 1. On the "Choose a data source" screen, select **"Azure Blob Storage"**.
 
@@ -40,7 +42,7 @@ This action will launch the guided import wizard to configure your data pipeline
 ![Select RAG Scenario](../Media/37.PNG)
 
 ---
-## Step 3: Connect to Azure Blob Storage
+## Task 3: Connect to Azure Blob Storage
 Configure the connection details to your storage account where the documents are located.
 
 1. In the "Configure your Azure Blob Storage" section, fill in the following fields:
@@ -51,17 +53,17 @@ Configure the connection details to your storage account where the documents are
    - **Parsing mode**: Keep as "Default"
    - Click **"Next (4)"** to proceed
 
-![Configure Blob Storage](../Media/38.PNG)
+![Configure Blob Storage](../Media/38(a).PNG)
 
 ---
-## Step 4: Set Up Vector Embeddings
+## Task 4: Set Up Vector Embeddings
 Configure the Azure OpenAI embedding model to vectorize your document content for semantic search.
 
 1. In the "Vectorize your text" section, configure:
    - **Kind (1)**: Select "Azure OpenAI"
    - **Subscription(2)**: Select your Azure subscription
    - **Azure OpenAI service (3)**: Select "cog" (your Azure OpenAI resource)
-   - **Model deployment (4)**: Select "embedding" (the text-embedding-ada-002 model deployed in Lab 2)
+   - **Model deployment (4)**: Select "embedding" (the text-embedding-ada-002 model deployed in Exercise 2)
    - **Authentication type (5)**: Keep "API key" selected (default)
    - Check the **acknowledgment box (6)** confirming additional costs for Azure OpenAI service usage
    - Click **"Next" (7)** to continue
@@ -69,7 +71,7 @@ Configure the Azure OpenAI embedding model to vectorize your document content fo
 ![Configure Embeddings](../Media/39.PNG)
 
 ---
-## Step 5: Configure AI Skills and Advanced Settings
+## Task 5: Configure AI Skills and Advanced Settings
 Set up optional enrichment and advanced search capabilities.
 
 1. On the "Vectorize and enrich your images" screen:
@@ -89,18 +91,18 @@ On the "Advanced settings" screen:
 ![Advanced Settings](../Media/41.PNG)
 
 ---
-## Step 6: Review Configuration and Create Index
+## Task 6: Review Configuration and Create Index
 Review your complete configuration before creating the search resources.
 
 1. On the "Review your configuration" screen, you'll see:
-   - **Objects name prefix (1)**: "gptkbindex"
+   - **Objects name prefix (1)**: "rag-index"
    - **Vectorize your text**: Azure OpenAI service with "embedding" model
    - **Semantic ranker**: Enabled
    - **Indexer run schedule**: Once (on-demand)
 
 2. Click **"Create" (2)** to deploy the search infrastructure
 
-![Review Configuration](../Media/42.PNG)
+![Review Configuration](../Media/42(a).PNG)
 
 The wizard will now create:
 - **Index**: The search index structure
@@ -113,7 +115,7 @@ Wait for the success message displayed below and click **Close**
 ![Creation Success](../Media/43.PNG)
 
 ---
-## Step 7: Monitor Data Source
+## Task 7: Monitor Data Source
 Verify that the data source and indexer have been created successfully.
 
 1. In the left sidebar, expand **"Search management" (1)** → **"Data sources" (2)**
@@ -123,10 +125,10 @@ Verify that the data source and indexer have been created successfully.
 
 You can explore the Data Source configurations here.
 
-![Data Source Details](../Media/45.PNG)
+![Data Source Details](../Media/45(a).PNG)
 
 ---
-## Step 8: Check Indexer Status
+## Task 8: Check Indexer Status
 Verify that the indexer has been created and is ready to run.
 
 1. In the left sidebar, navigate **"Indexers" (1)**
@@ -149,7 +151,7 @@ A confirmation dialog will appear:
 The indexer will now crawl your Blob Storage, process each document, generate vector embeddings using the Azure OpenAI embedding model, and populate the search index.
 
 ---
-## Step 9: Validate Index and Search
+## Task 9: Validate Index and Search
 Verify that documents have been successfully indexed and are searchable.
 
 1. In the left sidebar, navigate to **"Indexes" (1)**
@@ -164,14 +166,19 @@ Verify that documents have been successfully indexed and are searchable.
 
 ![Search Explorer Results](../Media/50.PNG)
 
-The search results display:
-- Relevant documents matched by the query
-- Semantic scoring and ranking
-- Complete document metadata and content chunks
-- Vector embeddings used for retrieval
+The search results display.
+## Summary
 
----
+In this exercise, you have accomplished the following:
 
-For additional information go through the [Azure AI Search documentation](https://learn.microsoft.com/azure/search/)
+- Navigated to the Azure AI Search service in the Azure portal
+- Configured a data source connection to Azure Blob Storage for document ingestion
+- Set up vector embeddings using the Azure OpenAI text-embedding-ada-002 model
+- Configured AI skills and enabled semantic ranking for improved search relevance
+- Created and deployed a search index with the import wizard
+- Executed the indexer to process and index documents from Blob Storage
+- Validated the search index functionality using the Search explorer
 
-In the **next lab** you will deploy and test the web application that integrates your Azure OpenAI chat model with the search index you just created, enabling users to ask questions about the Contoso Real Estate documents and receive AI-powered responses with relevant document references.
+You have successfully completed Exercise 3 and created a fully functional Azure AI Search index that integrates with Azure OpenAI for semantic search capabilities. This RAG pipeline will be used in the next exercise to power intelligent document retrieval for the web application.
+
+For additional information, refer to the [Azure AI Search documentation](https://learn.microsoft.com/azure/search/).

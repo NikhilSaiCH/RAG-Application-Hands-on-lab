@@ -1,29 +1,23 @@
-# Lab 2: Deploy Azure OpenAI Models and Upload Knowledge Base Documents
+# Exercise 2: Deploy Azure OpenAI Models and Upload Knowledge Base Documents
 
-### Overall Estimated Duration: 1 Hour
+## Lab scenario
 
----
+In this exercise, you will deploy the required Azure OpenAI model deployments for the RAG application and upload your knowledge base documents to Azure Blob Storage. You will create two model deployments—**GPT-4o** for chat completion and **text-embedding-ada-002** for embeddings—and then populate a Blob Storage container with the Contoso Real Estate sample documents.
 
-## Overview
+## Lab objectives
 
-In this lab, you will deploy the required Azure OpenAI model deployments for the RAG application and upload your knowledge base documents to Azure Blob Storage. You will create two model deployments—**GPT-4o** for chat completion and **text-embedding-ada-002** for embeddings—and then populate a Blob Storage container with the Contoso Real Estate sample documents.
+In this exercise, you will complete the following tasks:
 
----
+- Task 1: Navigate to Azure OpenAI Foundry portal
+- Task 2: Deploy the GPT-4o model for chat completions
+- Task 3: Deploy the text-embedding-ada-002 model for semantic embeddings
+- Task 4: Navigate to Azure Blob Storage
+- Task 5: Upload sample documents to the knowledge base
 
-## Objectives
-
-By the end of this lab, you will be able to:
-
-- Access the Azure OpenAI Foundry portal through the Azure Portal.
-- Deploy the GPT-4o model for chat completions.
-- Deploy the text-embedding-ada-002 model for semantic embeddings.
-- Navigate to Azure Blob Storage and locate the content container.
-- Upload sample documents to the Blob Storage knowledge base.
-
----
+## Estimated time: 1 hour
 
 
-## Step 1: Navigate to Azure OpenAI in the Azure Portal
+## Task 1: Navigate to Azure OpenAI in the Azure Portal
 
 1. From the Azure desktop, open the **Azure Portal**.
 
@@ -39,7 +33,7 @@ By the end of this lab, you will be able to:
 
 ---
 
-## Step 2: Deploy the GPT-4o Model
+## Task 2: Deploy the GPT-4o Model
 
 1. In the Foundry portal, navigate to **Model catalog (1)** from the left sidebar.
 
@@ -68,7 +62,7 @@ By the end of this lab, you will be able to:
 
 ---
 
-## Step 3: Deploy the text-embedding-ada-002 Model
+## Task 3: Deploy the text-embedding-ada-002 Model
 
 1. In the Foundry portal, return to **Model catalog (1)**.
 
@@ -97,7 +91,7 @@ By the end of this lab, you will be able to:
 
 ---
 
-## Step 4: Navigate to Azure Blob Storage
+## Task 4: Navigate to Azure Blob Storage
 
 1. Return to the Azure Portal.
 
@@ -118,7 +112,7 @@ By the end of this lab, you will be able to:
 
 ---
 
-## Step 5: Upload Documents to Blob Storage
+## Task 5: Upload Documents to Blob Storage
 
 1. Inside the content container, click the **Upload (1)** button.
 
@@ -128,28 +122,24 @@ By the end of this lab, you will be able to:
 
 3. Navigate to the data folder  **`azure-labs\azure-search-openai-javascript\data`(1)** and select the **documents(2)** to upload (PDF or text files) and click **Open(3)**
 
-![](../Media/31.PNG)
+   ![Select documents to upload](../Media/31.PNG)
 
 4. Click **Upload (1)** to add the documents to the knowledge base.
 
-![](../Media/32.PNG)
+   ![Upload documents](../Media/32.PNG)
 
-![](../Media/33.PNG)
-
----
-
-## Verification
-
-After uploading your documents, verify both steps were successful:
-
-- ✅ The **gpt-4o** model deployment is active in the Foundry portal.
-- ✅ The **text-embedding-ada-002** model deployment is active in the Foundry portal.
-- ✅ Your Contoso Real Estate documents are visible in the **content** container in Blob Storage.
+   ![Upload confirmation](../Media/33.PNG)
 
 ---
 
-## Next Step
+## Summary
 
-Once the model deployments and document uploads are complete, proceed to the next lab module to configure Azure AI Search and the import pipeline.
+In this exercise, you have accomplished the following:
 
----
+- Navigated to the Azure OpenAI Foundry portal through the Azure Portal
+- Deployed the GPT-4o model for chat completions with the deployment name "chat"
+- Deployed the text-embedding-ada-002 model for semantic embeddings with the deployment name "embedding"
+- Located the Azure Blob Storage account and navigated to the content container
+- Uploaded Contoso Real Estate sample documents to populate the knowledge base
+
+You have successfully completed Exercise 2 and prepared the AI models and knowledge base documents needed for the RAG application in subsequent exercises.
