@@ -1,0 +1,829 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "String"
+        },
+        "adminPassword": {
+            "type": "SecureString"
+        },
+        "AzureUserName": {
+            "type": "String"
+        },
+        "AzurePassword": {
+            "type": "SecureString"
+        },
+        "ODLID": {
+            "type": "String"
+        },
+        "DeploymentID": {
+            "type": "String"
+        },
+        "trainerUserName": {
+            "type": "String"
+        },
+        "trainerUserPassword": {
+            "type": "String"
+        },
+        "environmentName": {
+            "defaultValue": "ragproject",
+            "type": "String"
+        },
+        "containerAppsEnvironmentName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "containerRegistryName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "webAppName": {
+            "defaultValue": "webapp",
+            "type": "String"
+        },
+        "searchApiName": {
+            "defaultValue": "search",
+            "type": "String"
+        },
+        "searchApiImageName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "logAnalyticsName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "applicationInsightsName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "applicationInsightsDashboardName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "searchServiceName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "searchServiceLocation": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "searchServiceSkuName": {
+            "defaultValue": "standard",
+            "type": "String"
+        },
+        "searchIndexName": {
+            "defaultValue": "rag-index",
+            "type": "String"
+        },
+        "storageAccountName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "storageContainerName": {
+            "defaultValue": "content",
+            "type": "String"
+        },
+        "storageSkuName": {
+            "defaultValue": "Standard_LRS",
+            "type": "String"
+        },
+        "openAiServiceName": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "openAiResourceGroupLocation": {
+            "defaultValue": "eastus",
+            "type": "String"
+        },
+        "openAiSkuName": {
+            "defaultValue": "S0",
+            "type": "String"
+        },
+        "webAppLocation": {
+            "defaultValue": "eastus2",
+            "type": "String"
+        },
+        "chatGptDeploymentName": {
+            "defaultValue": "chat",
+            "type": "String"
+        },
+        "chatGptModelName": {
+            "defaultValue": "gpt-4o",
+            "type": "String"
+        },
+        "embeddingDeploymentName": {
+            "defaultValue": "embedding",
+            "type": "String"
+        },
+        "embeddingModelName": {
+            "defaultValue": "text-embedding-ada-002",
+            "type": "String"
+        },
+        "principalId": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "allowedOrigin": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "backendUri": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "aliasTag": {
+            "defaultValue": "",
+            "type": "String"
+        },
+        "isContinuousDeployment": {
+            "defaultValue": false,
+            "type": "Bool"
+        }
+    },
+    "variables": {
+        "cloudlabsCommon": "[concat(' -AzureUserName ', parameters('AzureUserName'), ' -AzurePassword ', parameters('AzurePassword'), ' -AzureTenantID ', variables('AzureTenantID'), ' -AzureSubscriptionID ', variables('AzureSubscriptionID'), ' -odlId ', parameters('ODLID'), ' -DeploymentID ', parameters('DeploymentID'), ' -adminPassword ', parameters('adminPassword'))]",
+        "Enable-CloudLabsEmbeddedShadow": "[concat(' -adminUsername ', parameters('adminUsername'), ' -trainerUserName ', parameters('trainerUserName'), ' -trainerUserPassword ', parameters('trainerUserPassword'))]",
+        "AzureSubscriptionID": "[subscription().subscriptionId]",
+        "AzureTenantID": "[subscription().tenantId]",
+        "location": "[resourceGroup().location]",
+        "vmName": "[concat('labvm-', parameters('DeploymentID'))]",
+        "virtualMachineSize": "Standard_DC4s_v3",
+        "virtualNetworkName": "labvNet",
+        "addressPrefix": "10.0.0.0/16",
+        "subnetName": "Subnet",
+        "subnetPrefix": "10.0.0.0/24",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', variables('virtualNetworkName'), variables('subnetName'))]",
+        "networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
+        "networkSecurityGroupName": "[concat(variables('vmName'), '-nsg')]",
+        "publicIpAddressName": "[concat(variables('vmName'), '-pip')]",
+        "publicIpAddressDNSName": "[concat('labvm', uniqueString(resourceGroup().id))]",
+        "resourceToken": "[toLower(uniqueString(subscription().id, parameters('environmentName'), resourceGroup().location))]",
+        "tags": "[if(empty(parameters('aliasTag')), createObject('azd-env-name', parameters('environmentName')), createObject('azd-env-name', parameters('environmentName'), 'alias', parameters('aliasTag')))]",
+        "logAnalyticsWorkspaceName": "[if(not(empty(parameters('logAnalyticsName'))), parameters('logAnalyticsName'), concat('log-', variables('resourceToken')))]",
+        "applicationInsightsName_var": "[if(not(empty(parameters('applicationInsightsName'))), parameters('applicationInsightsName'), concat('appi-', variables('resourceToken')))]",
+        "applicationInsightsDashboardName_var": "[if(not(empty(parameters('applicationInsightsDashboardName'))), parameters('applicationInsightsDashboardName'), concat('dash-', variables('resourceToken')))]",
+        "containerAppsEnvironmentName_var": "[if(not(empty(parameters('containerAppsEnvironmentName'))), parameters('containerAppsEnvironmentName'), concat('cae-', variables('resourceToken')))]",
+        "containerRegistryName_var": "[if(not(empty(parameters('containerRegistryName'))), parameters('containerRegistryName'), concat('cr', variables('resourceToken')))]",
+        "webAppName_var": "[if(not(empty(parameters('webAppName'))), parameters('webAppName'), concat('stapp-web-', variables('resourceToken')))]",
+        "searchApiIdentityName": "[concat('id-search-api-', variables('resourceToken'))]",
+        "searchApiName_var": "[if(not(empty(parameters('searchApiName'))), parameters('searchApiName'), concat('ca-search-', variables('resourceToken')))]",
+        "openAiServiceName_var": "[if(not(empty(parameters('openAiServiceName'))), parameters('openAiServiceName'), concat('cog-', variables('resourceToken')))]",
+        "searchServiceName_var": "[if(not(empty(parameters('searchServiceName'))), parameters('searchServiceName'), concat('gptkb-', variables('resourceToken')))]",
+        "searchServiceLocation_var": "[if(not(empty(parameters('searchServiceLocation'))), parameters('searchServiceLocation'), resourceGroup().location)]",
+        "storageAccountName_var": "[if(not(empty(parameters('storageAccountName'))), parameters('storageAccountName'), concat('st', variables('resourceToken')))]",
+        "searchApiImageName_var": "[if(not(empty(parameters('searchApiImageName'))), parameters('searchApiImageName'), 'nginx:latest')]",
+        "openAiRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+        "storageBlobDataContributorRoleId": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+        "storageBlobDataReaderRoleId": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1",
+        "searchIndexDataContributorRoleId": "8ebe5a00-799e-43f5-93ac-243d3dce84a7",
+        "searchIndexDataReaderRoleId": "1407120a-92aa-4202-b7e9-c0e197c71c8f",
+        "searchServiceContributorRoleId": "7ca78c08-252a-4471-8644-bb5ff32d4ba0"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2017-04-01",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('publicIpAddressName')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('publicIpAddressDNSName')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2017-06-01",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-rdp",
+                        "properties": {
+                            "priority": 110,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-09-01",
+            "name": "[variables('networkInterfaceName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "name": "[variables('vmName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-datacenter-azure-edition",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "name": "[concat(variables('vmName'), '-osdisk')]",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2022-10-01",
+            "name": "[variables('logAnalyticsWorkspaceName')]",
+            "location": "[variables('location')]",
+            "tags": "[variables('tags')]",
+            "properties": {
+                "retentionInDays": 30,
+                "features": {
+                    "searchVersion": 1
+                },
+                "sku": {
+                    "name": "PerGB2018"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02",
+            "name": "[variables('applicationInsightsName_var')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+            ],
+            "tags": "[variables('tags')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Portal/dashboards",
+            "apiVersion": "2020-09-01-preview",
+            "name": "[variables('applicationInsightsDashboardName_var')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName_var'))]"
+            ],
+            "tags": "[union(variables('tags'), createObject('hidden-title', concat('Application Insights Dashboard (', variables('applicationInsightsName_var'), ')')))]",
+            "properties": {
+                "lenses": [
+                    {
+                        "order": 0,
+                        "parts": [
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 0,
+                                    "colSpan": 4,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "type": "Extension/AppInsightsExtension/PartType/AppMapGalPt",
+                                    "inputs": [
+                                        {
+                                            "name": "ComponentId",
+                                            "value": {
+                                                "SubscriptionId": "[subscription().subscriptionId]",
+                                                "ResourceGroup": "[resourceGroup().name]",
+                                                "Name": "[variables('applicationInsightsName_var')]"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2023-01-01-preview",
+            "name": "[variables('containerRegistryName_var')]",
+            "location": "[variables('location')]",
+            "tags": "[variables('tags')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "adminUserEnabled": true
+            }
+        },
+        {
+            "type": "Microsoft.App/managedEnvironments",
+            "apiVersion": "2023-05-01",
+            "name": "[variables('containerAppsEnvironmentName_var')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]",
+                "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName_var'))]"
+            ],
+            "tags": "[variables('tags')]",
+            "properties": {
+                "appLogsConfiguration": {
+                    "destination": "log-analytics",
+                    "logAnalyticsConfiguration": {
+                        "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName')), '2022-10-01').customerId]",
+                        "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName')), '2022-10-01').primarySharedKey]"
+                    }
+                },
+                "daprAIInstrumentationKey": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName_var')), '2020-02-02').InstrumentationKey]"
+            }
+        },
+        {
+            "type": "Microsoft.Web/staticSites",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('webAppName_var')]",
+            "location": "[parameters('webAppLocation')]",
+            "tags": "[union(variables('tags'), createObject('azd-service-name', parameters('webAppName')))]",
+            "sku": {
+                "name": "Free",
+                "tier": "Free"
+            },
+            "properties": {
+                "buildProperties": {
+                    "skipGithubActionWorkflowGeneration": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2023-01-31",
+            "name": "[variables('searchApiIdentityName')]",
+            "location": "[variables('location')]"
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2023-05-01",
+            "name": "[variables('openAiServiceName_var')]",
+            "location": "[parameters('openAiResourceGroupLocation')]",
+            "tags": "[variables('tags')]",
+            "sku": {
+                "name": "[parameters('openAiSkuName')]"
+            },
+            "kind": "OpenAI",
+            "properties": {
+                "customSubDomainName": "[variables('openAiServiceName_var')]",
+                "publicNetworkAccess": "Enabled",
+                "disableLocalAuth": false
+            }
+        },
+        {
+            "type": "Microsoft.Search/searchServices",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('searchServiceName_var')]",
+            "location": "[variables('searchServiceLocation_var')]",
+            "tags": "[variables('tags')]",
+            "sku": {
+                "name": "[parameters('searchServiceSkuName')]"
+            },
+            "properties": {
+                "replicaCount": 1,
+                "partitionCount": 1,
+                "hostingMode": "default",
+                "publicNetworkAccess": "Enabled",
+                "semanticSearch": "[if(equals(parameters('searchServiceSkuName'), 'standard'), 'free', 'disabled')]",
+                "authOptions": {
+                    "aadOrApiKey": {
+                        "aadAuthFailureMode": "http401WithBearerChallenge"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('storageAccountName_var')]",
+            "location": "[variables('location')]",
+            "tags": "[variables('tags')]",
+            "sku": {
+                "name": "[parameters('storageSkuName')]"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot",
+                "publicNetworkAccess": "Enabled",
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": false,
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 2
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2022-09-01",
+            "name": "[concat(variables('storageAccountName_var'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName_var'))]"
+            ],
+            "properties": {
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 2
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2022-09-01",
+            "name": "[concat(variables('storageAccountName_var'), '/default/', parameters('storageContainerName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName_var'), 'default')]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.App/containerApps",
+            "apiVersion": "2023-05-01",
+            "name": "[variables('searchApiName_var')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvironmentName_var'))]",
+                "[resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName_var'))]",
+                "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName_var'))]",
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName'))]",
+                "[resourceId('Microsoft.Web/staticSites', variables('webAppName_var'))]",
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('openAiServiceName_var'))]",
+                "[resourceId('Microsoft.Search/searchServices', variables('searchServiceName_var'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName_var'))]"
+            ],
+            "tags": "[union(variables('tags'), createObject('azd-service-name', parameters('searchApiName')))]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName'))]": {}
+                }
+            },
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvironmentName_var'))]",
+                "configuration": {
+                    "activeRevisionsMode": "Single",
+                    "ingress": {
+                        "external": true,
+                        "targetPort": 3000,
+                        "corsPolicy": {
+                            "allowedOrigins": "[if(empty(parameters('allowedOrigin')), createArray(reference(resourceId('Microsoft.Web/staticSites', variables('webAppName_var')), '2022-09-01').defaultHostname), createArray(reference(resourceId('Microsoft.Web/staticSites', variables('webAppName_var')), '2022-09-01').defaultHostname, parameters('allowedOrigin')))]"
+                        }
+                    },
+                    "secrets": [
+                        {
+                            "name": "appinsights-cs",
+                            "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName_var')), '2020-02-02').ConnectionString]"
+                        },
+                        {
+                            "name": "registry-password",
+                            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName_var')), '2023-01-01-preview').passwords[0].value]"
+                        }
+                    ],
+                    "registries": [
+                        {
+                            "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName_var')), '2023-01-01-preview').loginServer]",
+                            "username": "[variables('containerRegistryName_var')]",
+                            "passwordSecretRef": "registry-password"
+                        }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "[variables('searchApiImageName_var')]",
+                            "name": "main",
+                            "resources": {
+                                "cpu": 1,
+                                "memory": "2Gi"
+                            },
+                            "env": [
+                                {
+                                    "name": "AZURE_OPENAI_CHATGPT_DEPLOYMENT",
+                                    "value": "[parameters('chatGptDeploymentName')]"
+                                },
+                                {
+                                    "name": "AZURE_OPENAI_CHATGPT_MODEL",
+                                    "value": "[parameters('chatGptModelName')]"
+                                },
+                                {
+                                    "name": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
+                                    "value": "[parameters('embeddingDeploymentName')]"
+                                },
+                                {
+                                    "name": "AZURE_OPENAI_EMBEDDING_MODEL",
+                                    "value": "[parameters('embeddingModelName')]"
+                                },
+                                {
+                                    "name": "AZURE_OPENAI_SERVICE",
+                                    "value": "[variables('openAiServiceName_var')]"
+                                },
+                                {
+                                    "name": "AZURE_SEARCH_INDEX",
+                                    "value": "[parameters('searchIndexName')]"
+                                },
+                                {
+                                    "name": "AZURE_SEARCH_SERVICE",
+                                    "value": "[variables('searchServiceName_var')]"
+                                },
+                                {
+                                    "name": "AZURE_STORAGE_ACCOUNT",
+                                    "value": "[variables('storageAccountName_var')]"
+                                },
+                                {
+                                    "name": "AZURE_STORAGE_CONTAINER",
+                                    "value": "[parameters('storageContainerName')]"
+                                },
+                                {
+                                    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                                    "secretRef": "appinsights-cs"
+                                },
+                                {
+                                    "name": "AZURE_CLIENT_ID",
+                                    "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), '2023-01-31').clientId]"
+                                }
+                            ]
+                        }
+                    ],
+                    "scale": {
+                        "minReplicas": 1,
+                        "maxReplicas": 10
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, parameters('principalId'), variables('openAiRoleId'), 'user')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('openAiServiceName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('openAiRoleId'))]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "User"
+            },
+            "condition": "[and(not(parameters('isContinuousDeployment')), not(empty(parameters('principalId'))))]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, parameters('principalId'), variables('storageBlobDataContributorRoleId'), 'user')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('storageBlobDataContributorRoleId'))]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "User"
+            },
+            "condition": "[and(not(parameters('isContinuousDeployment')), not(empty(parameters('principalId'))))]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, parameters('principalId'), variables('searchIndexDataContributorRoleId'), 'user')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Search/searchServices', variables('searchServiceName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('searchIndexDataContributorRoleId'))]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "User"
+            },
+            "condition": "[and(not(parameters('isContinuousDeployment')), not(empty(parameters('principalId'))))]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, parameters('principalId'), variables('searchServiceContributorRoleId'), 'user')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Search/searchServices', variables('searchServiceName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('searchServiceContributorRoleId'))]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "User"
+            },
+            "condition": "[and(not(parameters('isContinuousDeployment')), not(empty(parameters('principalId'))))]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), variables('openAiRoleId'), 'searchapi-v11')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName'))]",
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('openAiServiceName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('openAiRoleId'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), '2023-01-31', 'Full').properties.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), variables('storageBlobDataReaderRoleId'), 'searchapi-v11')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('storageBlobDataReaderRoleId'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), '2023-01-31', 'Full').properties.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), variables('searchIndexDataReaderRoleId'), 'searchapi-v11')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName'))]",
+                "[resourceId('Microsoft.Search/searchServices', variables('searchServiceName_var'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('searchIndexDataReaderRoleId'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('searchApiIdentityName')), '2023-01-31', 'Full').properties.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmName'), '/winExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "tags": {
+                "displayName": "VM Extension"
+            },
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://experienceazure.blob.core.windows.net/templates/cloudlabs-common/cloudlabs-windows-functions.ps1"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -Command \"$LogFile = 'C:\\Windows\\Temp\\CSE_Setup.log'; function Write-Log { param([string]$Message, [string]$Level = 'INFO'); $line = \"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')][$Level] $Message\"; Add-Content -Path $LogFile -Value $line -ErrorAction SilentlyContinue }; try { Write-Log '===== START ====='; Set-ExecutionPolicy Bypass -Scope Process -Force; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Write-Log 'Installing Chocolatey'; iex ((New-Object Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User'); Write-Log 'Installing Git'; choco install git -y --no-progress; Write-Log 'Installing VS Code'; choco install vscode -y --no-progress; Write-Log 'Installing Docker Desktop'; choco install docker-desktop -y --no-progress; Write-Log 'Enabling WSL2 features'; dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart; dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart; $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User'); Write-Log 'Creating C:\\LabFiles'; New-Item -ItemType Directory -Force -Path 'C:\\LabFiles' | Out-Null; Write-Log 'Cloning repo'; & 'C:\\Program Files\\Git\\bin\\git.exe' clone --depth 1 'https://github.com/NikhilSaiCH/azure-search-openai-javascript.git' 'C:\\LabFiles\\azure-search-openai-javascript'; Write-Log 'Creating Azure Portal shortcut'; $Desktop = 'C:\\Users\\Public\\Desktop'; New-Item -ItemType Directory -Force -Path $Desktop | Out-Null; $WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut($Desktop + '\\Azure Portal.lnk'); $EdgePath = @('${env:ProgramFiles(x86)}\\Microsoft\\Edge\\Application\\msedge.exe','${env:ProgramFiles}\\Microsoft\\Edge\\Application\\msedge.exe') | Where-Object { Test-Path $_ } | Select-Object -First 1; if ($EdgePath) { $Shortcut.TargetPath = $EdgePath; $Shortcut.Arguments = 'https://portal.azure.com'; $Shortcut.WorkingDirectory = Split-Path $EdgePath; $Shortcut.Save(); Write-Log 'Shortcut created' } else { Write-Log 'Edge not found, skipping shortcut' 'WARN' }; Write-Log '===== COMPLETED =====' } catch { Write-Log \\\"ERROR: $_\\\" 'ERROR' }\""
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "Deployment ID": {
+            "type": "String",
+            "value": "[parameters('DeploymentID')]"
+        },
+        "LABVM Admin Username": {
+            "type": "String",
+            "value": "[parameters('adminUsername')]"
+        },
+        "LABVM Admin Password": {
+            "type": "String",
+            "value": "[parameters('adminPassword')]"
+        },
+        "LABVM DNS Name": {
+            "type": "String",
+            "value": "[concat(variables('publicIpAddressDNSName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+        },
+        "trainerUserName": {
+            "type": "String",
+            "value": "[parameters('trainerUserName')]"
+        },
+        "trainerUserPassword": {
+            "type": "String",
+            "value": "[parameters('trainerUserPassword')]"
+        },
+        "AZURE_TENANT_ID": {
+            "type": "String",
+            "value": "[tenant().tenantId]"
+        },
+        "AZURE_RESOURCE_GROUP": {
+            "type": "String",
+            "value": "[resourceGroup().name]"
+        },
+        "AZURE_OPENAI_SERVICE": {
+            "type": "String",
+            "value": "[variables('openAiServiceName_var')]"
+        },
+        "AZURE_SEARCH_SERVICE": {
+            "type": "String",
+            "value": "[variables('searchServiceName_var')]"
+        },
+        "AZURE_STORAGE_ACCOUNT": {
+            "type": "String",
+            "value": "[variables('storageAccountName_var')]"
+        },
+        "AZURE_CONTAINER_REGISTRY_NAME": {
+            "type": "String",
+            "value": "[variables('containerRegistryName_var')]"
+        },
+        "WEBAPP_URI": {
+            "type": "String",
+            "value": "[concat('https://', reference(resourceId('Microsoft.Web/staticSites', variables('webAppName_var')), '2022-09-01').defaultHostname)]"
+        },
+        "SEARCH_API_URI": {
+            "type": "String",
+            "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('searchApiName_var')), '2023-05-01').configuration.ingress.fqdn)]"
+        }
+    }
+}

@@ -9,6 +9,31 @@ The lab takes you through the complete data and deployment lifecycle: uploading 
 
 All core infrastructure has been pre-provisioned using a Bicep template deployed into your Azure resource group. Your task is to configure, populate, and validate the AI services that bring the application to life.
 
+## Architecture Overview
+
+This exercise sets up the foundational environment for your Azure OpenAI and Azure AI Search RAG application. The architecture diagram below shows the complete system and data flow you'll be working with throughout the workshop:
+
+![Complete RAG Application Architecture](../Media/app-architecture.png)
+
+This diagram shows the following flow:
+
+- A user submits a question through the decoupled frontend chat application.
+- The frontend sends the query to the Search Node.js service, which orchestrates the RAG workflow.
+- The Search Node.js service uses the Azure OpenAI SDK / LangChain to invoke Azure OpenAI for prompt completion.
+- For document retrieval, the Search service queries Azure AI Search using semantic/vector search.
+- The Document Ingestion Node.js service ingests raw documents (PDF, Markdown, etc.) and sends them to Azure Blob Storage as the knowledge base.
+- The ingestion service also indexes documents in Azure AI Search and creates embeddings through Azure OpenAI.
+- Azure AI Search stores the semantic index and returns the most relevant document chunks to the Search service.
+- The Search service combines retrieved context with the user query and forwards it to Azure OpenAI to generate the final answer.
+
+**Key components in the diagram:**
+- **Decoupled Frontend App**: Hosts the chat UI and sends user questions to the backend.
+- **Search Node.js Service**: Orchestrates search, retrieval, and OpenAI completions.
+- **Document Ingestion Node.js Service**: Handles document upload, storage, indexing, and embedding creation.
+- **Azure OpenAI Service**: Provides GPT-based chat completions and embeddings.
+- **Azure AI Search**: Performs semantic search and stores indexed document vectors.
+- **Azure Blob Storage**: Stores source documents used by the ingestion pipeline.
+
 ---
 ## Objectives
 By the end of this lab, you will be able to:

@@ -13,7 +13,7 @@ In this exercise, you will complete the following tasks:
 - Task 3: Test the application with various queries about enterprise data
 - Task 4: Review AI responses with citations and supporting context
 
-## Estimated time: 20 minutes
+## Estimated time: 45 minutes
 ## Task 1: Search for Static Web Apps in Azure Portal
 Start by finding the deployed Static Web App resource in the Azure Portal.
 
